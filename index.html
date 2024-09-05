@@ -276,3 +276,257 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack Ya Meat Deluxe - 90s Windows Edition</title>
+    <!-- Classic Windows fonts -->
+    <style>
+        body {
+            font-family: 'Tahoma', 'Verdana', sans-serif;
+            background-color: #c0c0c0; /* Classic Windows gray background */
+            color: black;
+            text-align: center;
+            padding: 2rem;
+        }
+        header {
+            background-color: #000080; /* Classic blue title bar */
+            color: white;
+            padding: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: left;
+        }
+        nav ul {
+            display: flex;
+            justify-content: space-between;
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 0 10px;
+        }
+        /* Classic Windows button style */
+        #start-button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            background-color: #d0d0d0;
+            color: black;
+            border: 2px solid #808080;
+            border-radius: 0;
+            box-shadow: 2px 2px 0px #808080;
+            transition: background-color 0.2s ease;
+        }
+        #start-button:active {
+            background-color: #c0c0c0;
+            box-shadow: none;
+        }
+        #game-board {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background-color: #ffffff;
+            margin: 0 auto;
+            border: 2px solid #808080;
+            box-shadow: 3px 3px 0px #404040;
+        }
+        .meat {
+            position: absolute;
+            font-size: 48px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .meat:hover {
+            transform: scale(1.1);
+        }
+        #score, #timer, #level {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        #username {
+            font-weight: bold;
+        }
+        #high-scores {
+            margin-top: 20px;
+            text-align: left;
+        }
+        #high-scores-list li {
+            background-color: #f0f0f0;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #808080;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <ul>
+                <li>Whack Ya Meat Deluxe - 90s Edition</li>
+                <li><a href="#" onclick="resetGame()" style="color: white;">New Game</a></li>
+                <li><a href="#high-scores" style="color: white;">High Scores</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section>
+            <hgroup>
+                <h2>Welcome to Whack Ya Meat Deluxe</h2>
+                <h3>Whack as much meat as you can before time runs out!</h3>
+            </hgroup>
+            <p>Click on different types of meat to earn points! Watch the timer!</p>
+
+            <div id="game-board"></div>
+
+            <h3>Player: <span id="username"></span></h3>
+            <h3>Score: <span id="score">0</span></h3>
+            <h3>Time: <span id="timer">60</span></h3>
+            <h3>Level: <span id="level">1</span></h3>
+
+            <button id="start-button" onclick="startGame()">Start Game</button>
+        </section>
+    </main>
+
+    <section id="high-scores">
+        <h2>High Scores</h2>
+        <ol id="high-scores-list"></ol>
+    </section>
+
+    <footer>
+        <small><a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a></small>
+    </footer>
+
+    <script>
+        const gameBoard = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const levelDisplay = document.getElementById('level');
+        const usernameDisplay = document.getElementById('username');
+        const startButton = document.getElementById('start-button');
+        const highScoresList = document.getElementById('high-scores-list');
+
+        let score = 0;
+        let timeLeft = 60;
+        let level = 1;
+        let gameInterval;
+        let timerInterval;
+
+        const meatTypes = [
+            { emoji: '🥩', points: 1 },
+            { emoji: '🍗', points: 2 },
+            { emoji: '🥓', points: 3 },
+            { emoji: '🍖', points: 5 },
+            { emoji: '🥇', points: 10, powerUp: true },
+            { emoji: '☠️', points: -10, penalty: true }
+        ];
+
+        // Generate random username
+        const randomUsername = 'Player_' + Math.floor(Math.random() * 10000);
+        usernameDisplay.textContent = randomUsername;
+
+        function createMeat() {
+            const meat = document.createElement('span');
+            const meatType = meatTypes[Math.floor(Math.random() * meatTypes.length)];
+            meat.textContent = meatType.emoji;
+            meat.className = 'meat';
+            if (meatType.powerUp) {
+                meat.classList.add('power-up');
+            }
+            if (meatType.penalty) {
+                meat.classList.add('penalty');
+            }
+            meat.style.left = Math.random() * (gameBoard.clientWidth - 50) + 'px';
+            meat.style.top = Math.random() * (gameBoard.clientHeight - 50) + 'px';
+            meat.onclick = () => {
+                score += meatType.points;
+                scoreDisplay.textContent = score;
+                gameBoard.removeChild(meat);
+            };
+            gameBoard.appendChild(meat);
+            setTimeout(() => {
+                if (gameBoard.contains(meat)) {
+                    gameBoard.removeChild(meat);
+                }
+            }, 2000 / level);
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            level = 1;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeLeft;
+            levelDisplay.textContent = level;
+            startButton.disabled = true;
+
+            gameInterval = setInterval(() => {
+                createMeat();
+                if (score >= level * 50) {
+                    level++;
+                    levelDisplay.textContent = level;
+                }
+            }, 1000 / level);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            startButton.disabled = false;
+            gameBoard.innerHTML = '';
+            alert(`Game Over! Your score: ${score}`);
+            updateHighScores();
+        }
+
+        function resetGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            score = 0;
+            timeLeft = 60;
+            level = 1;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeLeft;
+            levelDisplay.textContent = level;
+            startButton.disabled = false;
+            gameBoard.innerHTML = '';
+        }
+
+        function updateHighScores() {
+            let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+            highScores.push({name: randomUsername, score: score});
+            highScores.sort((a, b) => b.score - a.score);
+            highScores = highScores.slice(0, 5);  // Keep only top 5
+            localStorage.setItem('highScores', JSON.stringify(highScores));
+            displayHighScores();
+        }
+
+        function displayHighScores() {
+            const highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+            highScoresList.innerHTML = '';
+            highScores.forEach(score => {
+                const li = document.createElement('li');
+                li.textContent = `${score.name}: ${score.score}`;
+                highScoresList.appendChild(li);
+            });
+        }
+
+        displayHighScores();
+    </script>
+
+</body>
+</html>
