@@ -52,6 +52,13 @@
             background-color: red;
             color: white;
         }
+        /* Responsive design for mobile */
+        @media (max-width: 600px) {
+            #game-board {
+                width: 90%;
+                height: 90%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -162,6 +169,11 @@
             levelDisplay.textContent = level;
             startButton.disabled = true;
 
+            // Start background music
+            const backgroundMusic = new Audio('sounds/background.mp3');
+            backgroundMusic.loop = true;
+            backgroundMusic.play();
+
             gameInterval = setInterval(() => {
                 createMeat();
                 if (score >= level * 50) {
@@ -222,8 +234,13 @@
         }
 
         function playSound(soundType) {
-            // In a real implementation, you would play actual sound files here
-            console.log(`Playing ${soundType} sound`);
+            let audio;
+            if (soundType === 'whack') {
+                audio = new Audio('sounds/whack.mp3');
+            } else if (soundType === 'levelUp') {
+                audio = new Audio('sounds/levelUp.mp3');
+            }
+            audio.play();
         }
 
         displayHighScores();
