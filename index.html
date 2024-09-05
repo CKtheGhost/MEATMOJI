@@ -44,6 +44,14 @@
             font-size: 1.2em;
             padding: 10px 20px;
         }
+        .power-up {
+            background-color: gold;
+            color: black;
+        }
+        .penalty {
+            background-color: red;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +117,9 @@
             { emoji: '🥩', points: 1 },
             { emoji: '🍗', points: 2 },
             { emoji: '🥓', points: 3 },
-            { emoji: '🍖', points: 5 }
+            { emoji: '🍖', points: 5 },
+            { emoji: '🥇', points: 10, powerUp: true },
+            { emoji: '☠️', points: -10, penalty: true }
         ];
 
         // Generate random username
@@ -121,6 +131,12 @@
             const meatType = meatTypes[Math.floor(Math.random() * meatTypes.length)];
             meat.textContent = meatType.emoji;
             meat.className = 'meat';
+            if (meatType.powerUp) {
+                meat.classList.add('power-up');
+            }
+            if (meatType.penalty) {
+                meat.classList.add('penalty');
+            }
             meat.style.left = Math.random() * (gameBoard.clientWidth - 50) + 'px';
             meat.style.top = Math.random() * (gameBoard.clientHeight - 50) + 'px';
             meat.onclick = () => {
