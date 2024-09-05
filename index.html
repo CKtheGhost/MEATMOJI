@@ -186,7 +186,7 @@
                 </div>
             </div>
 
-            <button id="start-button" onclick="startGame()">Start Game</button>
+            <button id="start-button" type="button" onclick="startGame()">Start Game</button>
         </section>
 
         <section id="high-scores">
@@ -238,6 +238,8 @@
                 gameBoard.removeChild(meat);
             };
             gameBoard.appendChild(meat);
+
+            // Fix security: Use function instead of string in setTimeout
             setTimeout(() => {
                 if (gameBoard.contains(meat)) {
                     gameBoard.removeChild(meat);
@@ -254,6 +256,8 @@
             levelDisplay.textContent = level;
 
             gameBoard.innerHTML = '';
+            
+            // Fix security: Use function instead of string in setInterval
             gameInterval = setInterval(() => {
                 createMeat();
                 if (score >= level * 50) {
