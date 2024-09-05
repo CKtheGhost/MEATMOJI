@@ -4,363 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whack Ya Meat Deluxe</title>
-    <!-- Add Google Fonts for a more professional look -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Add Pico.css for minimal styling -->
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Minimal CSS Framework (Picocss) for clean design -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+
     <style>
+        /* General styling for the website */
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #1b1b1b; /* Dark background for a sleek look */
-            color: #e0e0e0; /* Light text for readability */
-            text-align: center;
-            padding: 2rem;
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
         }
         
-        /* Game board container */
-        #game-board {
-            position: relative;
-            width: 400px;
-            height: 400px;
-            background-image: url('https://via.placeholder.com/400x400/333333/cccccc'); /* Placeholder background */
-            background-size: cover;
-            margin: 0 auto;
-            border: 5px solid #3a3a3a; /* Dark border for a professional look */
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* Smooth shadow */
-        }
-        
-        /* Style for the clickable meat elements */
-        .meat {
-            position: absolute;
-            font-size: 48px;
-            cursor: pointer;
-            transition: transform 0.1s ease, opacity 0.2s ease;
-        }
-        .meat:hover {
-            transform: scale(1.1);
-            opacity: 0.9; /* Slight fade effect */
-        }
-        
-        /* Information panel styles */
-        #score, #timer, #level {
-            font-size: 24px;
-            margin: 10px 0;
-        }
-        #username {
-            font-weight: bold;
-        }
-        
-        /* Style for the start button */
-        #start-button {
-            font-size: 1.2em;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            transition: background-color 0.2s ease;
-        }
-        #start-button:hover {
-            background-color: #0056b3;
-        }
-        
-        /* High scores section */
-        #high-scores {
-            margin-top: 20px;
-        }
-        #high-scores-list {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        #high-scores-list li {
-            background-color: #2e2e2e;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Responsive design for mobile */
-        @media (max-width: 600px) {
-            #game-board {
-                width: 90%;
-                height: 90%;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <nav class="container-fluid">
-            <ul><li><strong>Whack Ya Meat Deluxe!</strong></li></ul>
-            <ul>
-                <li><a href="#" onclick="resetGame()">New Game</a></li>
-                <li><a href="#high-scores">High Scores</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container">
-        <div class="grid">
-            <section>
-                <hgroup>
-                    <h2>Welcome to Whack Ya Meat Deluxe</h2>
-                    <h3>How much meat can you whack?</h3>
-                </hgroup>
-                <p>Click different types of meat to score points! Hurry, time is ticking!</p>
-
-                <div id="game-board"></div>
-
-                <h3>Player: <span id="username"></span></h3>
-                <h3>Score: <span id="score">0</span></h3>
-                <h3>Time: <span id="timer">60</span></h3>
-                <h3>Level: <span id="level">1</span></h3>
-
-                <button id="start-button" onclick="startGame()">Start Game</button>
-            </section>
-        </div>
-    </main>
-
-    <section id="high-scores">
-        <div class="container">
-            <h2>High Scores</h2>
-            <ol id="high-scores-list"></ol>
-        </div>
-    </section>
-
-    <footer class="container">
-        <small><a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a></small>
-    </footer>
-
-    <script>
-        const gameBoard = document.getElementById('game-board');
-        const scoreDisplay = document.getElementById('score');
-        const timerDisplay = document.getElementById('timer');
-        const levelDisplay = document.getElementById('level');
-        const usernameDisplay = document.getElementById('username');
-        const startButton = document.getElementById('start-button');
-        const highScoresList = document.getElementById('high-scores-list');
-
-        let score = 0;
-        let timeLeft = 60;
-        let level = 1;
-        let gameInterval;
-        let timerInterval;
-
-        const meatTypes = [
-            { emoji: '🥩', points: 1 },
-            { emoji: '🍗', points: 2 },
-            { emoji: '🥓', points: 3 },
-            { emoji: '🍖', points: 5 },
-            { emoji: '🥇', points: 10, powerUp: true },
-            { emoji: '☠️', points: -10, penalty: true }
-        ];
-
-        // Generate random username
-        const randomUsername = 'Player_' + Math.floor(Math.random() * 10000);
-        usernameDisplay.textContent = randomUsername;
-
-        function createMeat() {
-            const meat = document.createElement('span');
-            const meatType = meatTypes[Math.floor(Math.random() * meatTypes.length)];
-            meat.textContent = meatType.emoji;
-            meat.className = 'meat';
-            if (meatType.powerUp) {
-                meat.classList.add('power-up');
-            }
-            if (meatType.penalty) {
-                meat.classList.add('penalty');
-            }
-            meat.style.left = Math.random() * (gameBoard.clientWidth - 50) + 'px';
-            meat.style.top = Math.random() * (gameBoard.clientHeight - 50) + 'px';
-            meat.onclick = () => {
-                score += meatType.points;
-                scoreDisplay.textContent = score;
-                gameBoard.removeChild(meat);
-                playSound('whack');
-            };
-            gameBoard.appendChild(meat);
-            setTimeout(() => {
-                if (gameBoard.contains(meat)) {
-                    gameBoard.removeChild(meat);
-                }
-            }, 2000 / level);
-        }
-
-        function startGame() {
-            score = 0;
-            timeLeft = 60;
-            level = 1;
-            scoreDisplay.textContent = score;
-            timerDisplay.textContent = timeLeft;
-            levelDisplay.textContent = level;
-            startButton.disabled = true;
-
-            // Start background music
-            const backgroundMusic = new Audio('sounds/background.mp3');
-            backgroundMusic.loop = true;
-            backgroundMusic.play();
-
-            gameInterval = setInterval(() => {
-                createMeat();
-                if (score >= level * 50) {
-                    level++;
-                    levelDisplay.textContent = level;
-                    playSound('levelUp');
-                }
-            }, 1000 / level);
-
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    endGame();
-                }
-            }, 1000);
-        }
-
-        function endGame() {
-            clearInterval(gameInterval);
-            clearInterval(timerInterval);
-            startButton.disabled = false;
-            gameBoard.innerHTML = '';
-            alert(`Game Over! Your score: ${score}`);
-            updateHighScores();
-        }
-
-        function resetGame() {
-            clearInterval(gameInterval);
-            clearInterval(timerInterval);
-            score = 0;
-            timeLeft = 60;
-            level = 1;
-            scoreDisplay.textContent = score;
-            timerDisplay.textContent = timeLeft;
-            levelDisplay.textContent = level;
-            startButton.disabled = false;
-            gameBoard.innerHTML = '';
-        }
-
-        function updateHighScores() {
-            let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
-            highScores.push({name: randomUsername, score: score});
-            highScores.sort((a, b) => b.score - a.score);
-            highScores = highScores.slice(0, 5);  // Keep only top 5
-            localStorage.setItem('highScores', JSON.stringify(highScores));
-            displayHighScores();
-        }
-
-        function displayHighScores() {
-            const highScores = JSON.parse(localStorage.getItem('highScores')) || [];
-            highScoresList.innerHTML = '';
-            highScores.forEach(score => {
-                const li = document.createElement('li');
-                li.textContent = `${score.name}: ${score.score}`;
-                highScoresList.appendChild(li);
-            });
-        }
-
-        function playSound(soundType) {
-            let audio;
-            if (soundType === 'whack') {
-                audio = new Audio('sounds/whack.mp3');
-            } else if (soundType === 'levelUp') {
-                audio = new Audio('sounds/levelUp.mp3');
-            }
-            audio.play();
-        }
-
-        displayHighScores();
-    </script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whack Ya Meat Deluxe - 90s Windows Edition</title>
-    <!-- Classic Windows fonts -->
-    <style>
-        body {
-            font-family: 'Tahoma', 'Verdana', sans-serif;
-            background-color: #c0c0c0; /* Classic Windows gray background */
-            color: black;
-            text-align: center;
-            padding: 2rem;
-        }
+        /* Main header styling */
         header {
-            background-color: #000080; /* Classic blue title bar */
+            background-color: #007bff;
+            padding: 1rem;
             color: white;
-            padding: 10px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: left;
+            text-align: center;
         }
+        
+        /* Navigation bar */
         nav ul {
             display: flex;
             justify-content: space-between;
-            list-style: none;
+            list-style-type: none;
             padding: 0;
         }
+        
         nav ul li {
-            margin: 0 10px;
+            margin: 0 1rem;
         }
-        /* Classic Windows button style */
-        #start-button {
-            font-size: 1.2em;
-            padding: 10px 20px;
-            background-color: #d0d0d0;
-            color: black;
-            border: 2px solid #808080;
-            border-radius: 0;
-            box-shadow: 2px 2px 0px #808080;
-            transition: background-color 0.2s ease;
+        
+        nav a {
+            color: white;
+            text-decoration: none;
         }
-        #start-button:active {
-            background-color: #c0c0c0;
-            box-shadow: none;
+
+        /* Main game container */
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
+
+        /* Game board styling */
         #game-board {
             position: relative;
-            width: 400px;
+            width: 100%;
             height: 400px;
-            background-color: #ffffff;
-            margin: 0 auto;
-            border: 2px solid #808080;
-            box-shadow: 3px 3px 0px #404040;
+            background-color: #f5f5f5;
+            border: 2px solid #ddd;
+            margin: 1.5rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
         }
+
         .meat {
             position: absolute;
             font-size: 48px;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: transform 0.1s ease-in-out;
         }
+
         .meat:hover {
-            transform: scale(1.1);
+            transform: scale(1.2);
         }
-        #score, #timer, #level {
-            font-size: 24px;
-            margin: 10px 0;
+
+        /* Button styling */
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
         }
-        #username {
-            font-weight: bold;
+
+        button:hover {
+            background-color: #218838;
         }
+
+        /* Information display styling */
+        #stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            font-size: 1.2rem;
+        }
+
+        #stats div {
+            text-align: center;
+        }
+
+        /* High scores section */
         #high-scores {
-            margin-top: 20px;
-            text-align: left;
+            margin-top: 2rem;
         }
+
+        #high-scores-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
         #high-scores-list li {
-            background-color: #f0f0f0;
-            margin: 5px 0;
+            background-color: #f8f9fa;
             padding: 10px;
-            border: 1px solid #808080;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        /* Footer */
         footer {
-            margin-top: 20px;
-            font-size: 0.9em;
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            #game-board {
+                height: 300px;
+            }
+
+            button {
+                width: 100%;
+                padding: 10px;
+            }
         }
     </style>
 </head>
@@ -369,39 +152,48 @@
     <header>
         <nav>
             <ul>
-                <li>Whack Ya Meat Deluxe - 90s Edition</li>
-                <li><a href="#" onclick="resetGame()" style="color: white;">New Game</a></li>
-                <li><a href="#high-scores" style="color: white;">High Scores</a></li>
+                <li><strong>Whack Ya Meat Deluxe</strong></li>
+                <li><a href="#" onclick="resetGame()">New Game</a></li>
+                <li><a href="#high-scores">High Scores</a></li>
             </ul>
         </nav>
     </header>
 
-    <main class="container">
+    <main>
         <section>
-            <hgroup>
-                <h2>Welcome to Whack Ya Meat Deluxe</h2>
-                <h3>Whack as much meat as you can before time runs out!</h3>
-            </hgroup>
-            <p>Click on different types of meat to earn points! Watch the timer!</p>
+            <h1>Welcome to Whack Ya Meat Deluxe</h1>
+            <p>Can you whack the meat faster than anyone else? Click as much meat as possible before time runs out!</p>
 
-            <div id="game-board"></div>
+            <div id="game-board">
+                <p>Click "Start Game" to begin</p>
+            </div>
 
-            <h3>Player: <span id="username"></span></h3>
-            <h3>Score: <span id="score">0</span></h3>
-            <h3>Time: <span id="timer">60</span></h3>
-            <h3>Level: <span id="level">1</span></h3>
+            <div id="stats">
+                <div>
+                    <h3>Player: <span id="username"></span></h3>
+                </div>
+                <div>
+                    <h3>Score: <span id="score">0</span></h3>
+                </div>
+                <div>
+                    <h3>Time: <span id="timer">60</span></h3>
+                </div>
+                <div>
+                    <h3>Level: <span id="level">1</span></h3>
+                </div>
+            </div>
 
             <button id="start-button" onclick="startGame()">Start Game</button>
         </section>
+
+        <section id="high-scores">
+            <h2>High Scores</h2>
+            <ol id="high-scores-list"></ol>
+        </section>
     </main>
 
-    <section id="high-scores">
-        <h2>High Scores</h2>
-        <ol id="high-scores-list"></ol>
-    </section>
-
     <footer>
-        <small><a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a></small>
+        <p>&copy; 2024 Whack Ya Meat Deluxe. All rights reserved.</p>
     </footer>
 
     <script>
@@ -410,7 +202,6 @@
         const timerDisplay = document.getElementById('timer');
         const levelDisplay = document.getElementById('level');
         const usernameDisplay = document.getElementById('username');
-        const startButton = document.getElementById('start-button');
         const highScoresList = document.getElementById('high-scores-list');
 
         let score = 0;
@@ -428,7 +219,6 @@
             { emoji: '☠️', points: -10, penalty: true }
         ];
 
-        // Generate random username
         const randomUsername = 'Player_' + Math.floor(Math.random() * 10000);
         usernameDisplay.textContent = randomUsername;
 
@@ -437,12 +227,6 @@
             const meatType = meatTypes[Math.floor(Math.random() * meatTypes.length)];
             meat.textContent = meatType.emoji;
             meat.className = 'meat';
-            if (meatType.powerUp) {
-                meat.classList.add('power-up');
-            }
-            if (meatType.penalty) {
-                meat.classList.add('penalty');
-            }
             meat.style.left = Math.random() * (gameBoard.clientWidth - 50) + 'px';
             meat.style.top = Math.random() * (gameBoard.clientHeight - 50) + 'px';
             meat.onclick = () => {
@@ -465,8 +249,8 @@
             scoreDisplay.textContent = score;
             timerDisplay.textContent = timeLeft;
             levelDisplay.textContent = level;
-            startButton.disabled = true;
 
+            gameBoard.innerHTML = '';
             gameInterval = setInterval(() => {
                 createMeat();
                 if (score >= level * 50) {
@@ -487,9 +271,7 @@
         function endGame() {
             clearInterval(gameInterval);
             clearInterval(timerInterval);
-            startButton.disabled = false;
-            gameBoard.innerHTML = '';
-            alert(`Game Over! Your score: ${score}`);
+            gameBoard.innerHTML = '<p>Game Over!</p>';
             updateHighScores();
         }
 
@@ -502,15 +284,14 @@
             scoreDisplay.textContent = score;
             timerDisplay.textContent = timeLeft;
             levelDisplay.textContent = level;
-            startButton.disabled = false;
-            gameBoard.innerHTML = '';
+            gameBoard.innerHTML = '<p>Click "Start Game" to begin</p>';
         }
 
         function updateHighScores() {
             let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
             highScores.push({name: randomUsername, score: score});
             highScores.sort((a, b) => b.score - a.score);
-            highScores = highScores.slice(0, 5);  // Keep only top 5
+            highScores = highScores.slice(0, 5);
             localStorage.setItem('highScores', JSON.stringify(highScores));
             displayHighScores();
         }
